@@ -43,7 +43,7 @@ To enable *playtkl*, a Tk application should *source playtkl.tcl* and then run t
         set playtklfname ./playtkl.log
         playtkl::inform no
 
-        if 0 {
+        if 1 {
 
           # 1. recording
           after 4000 "playtkl::record $playtklfname F11"  ;# or just: playtkl::record $playtklfname
@@ -77,11 +77,11 @@ In the above example, the recording and playing are run after 4 seconds of waiti
 
 Also note that F11 is passed as 2nd (omittable) argument to *playtkl::record* which means a key to stop the recording. This key is mostly good for a macro recording.
 
-The stop key is also useful for testing Tk applications. If a scenario was stopped with a key, then the final state of the application after its playback should be the same as it was after the recording. It's only the final states that can be interesting: they don't coincide, the test failed.
+The stop key is also useful for testing Tk applications. If a scenario was stopped with a key, then the final state of the application after its playback should be the same as it was after the recording. It's only the final states that can be interesting: if they didn't coincide, the test failed.
 
 In the above example, F12 is passed as 2nd (omittable) argument to *playtkl::play* which means a key to pause / resume the playing.
 
-The example shows a use of *playtkl* in a working mode of Tk application, when the *playtkl* stuff is disabled by "if 0 ..." command (or commented out).
+The example shows a use of *playtkl* in a working mode of Tk application, when the *playtkl* stuff is disabled with "if 0 ..." command (or with commenting out).
 
 # Records
 
@@ -105,7 +105,7 @@ The file of records can contain emply lines and comments like this:
 
 It begins with comments about the start / end of recording.
 
-At need, any lines can commented out, e.g. last ones that close the application as shown above.
+At need, any lines can be commented out, e.g. last ones that close the application as shown above.
 
 # Macros
 
@@ -142,7 +142,7 @@ To replay a macro, *playtkl::replay* is used. A recorded file's name can be pass
 
 # Issues
 
-The initial state of a tested Tk application should be absolutely the same at recording and at playing a testing scenario. If the application uses configuration files, these files should be supplied to it in the same state at recording and at playing. It refers mostly to a geometry of Tk application as a whole and to its internal widgets which depend on a ttk theme. But an application's behavior can interfere with the playing too. Probably, OS environment should be identical, e.g. the less the loaded programs the better (esp. notifiers & shedulers).
+The initial state of a tested Tk application should be absolutely the same at recording and at playing a testing scenario. If the application uses configuration files, these files should be supplied to it in the same state at recording and at playing. It refers mostly to a geometry of Tk application as a whole and to its internal widgets which depend on a ttk theme. But an application's behavior can interfere with the playing too. Probably, OS environments should be identical, e.g. the less the loaded programs the better (esp. notifiers & shedulers).
 
 The following two facts should be counted (i.e. appropriate uses should be avoided):
 
@@ -150,7 +150,7 @@ The following two facts should be counted (i.e. appropriate uses should be avoid
 
    * *playtkl* doesn't catch events related to window managers like clicking a window's title buttons
 
-With moveable widgets like scrollbars, scales, rulers etc., there may be problems when the widgets are moved too fast at recording - then, at playing them, the mouse pointer can lag a bit, so that the replayed picture would be restorted. Though a bit annoying, this artifact isn't critical in most cases.
+With moveable widgets like scrollbars, scales, rulers etc., there may be problems when the widgets are moved too fast at recording - then, at playing them, the mouse pointer can lag a bit, so that the replayed picture would be distorted. Though a bit annoying, this artifact isn't critical in most cases.
 
 However, if played okay once, a recorded scenario would be played okay in all future runs as well. It isn't hard to reach.
 
