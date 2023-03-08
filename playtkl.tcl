@@ -6,30 +6,13 @@
 # License: MIT.
 ###########################################################
 
-package provide playtkl 1.0
+package provide playtkl 1.0.1
 
 # _________________________ playtkl ________________________ #
 
 namespace eval playtkl {
   variable fields {-time %t -keysym %K -button %b -x %x -y %y -state %s -data %d}
   variable dd; array set dd {timing 1 endkey "" pausekey ""}
-}
-#_______________________
-
-proc playtkl::inform {msg} {
-  # Puts out a short message and the current time.
-  #   msg - the message or yes/no to switch the puts on/off
-
-  variable dd
-  if {[string is boolean $msg]} {
-    set dd(timing) $msg
-  } elseif {$dd(timing)} {
-    set msg [string range "          $msg" end-10 end]
-    set msg "playtkl: $msg: [clock format [clock seconds] -format %T]"
-    puts $msg
-    bell
-  }
-  return $msg
 }
 #_______________________
 
@@ -41,6 +24,20 @@ proc playtkl::Data {w data} {
   set i [lsearch -glob $data $w*]
   set d [lindex $data $i]
   return [string range $d [string first = $d]+1 end]
+}
+#_______________________
+
+proc playtkl::Mapping {win} {
+  # Maps a recorded window to a played one.
+  #   win - the recorded window's path
+  # At recording, some widgets may be dynamic, with their pathes not equal to current ones
+  # => map them.
+
+  variable dd
+  foreach {w1 w2} $dd(mappings) {
+    if {[string match $w1 $win]} {return $w2}
+  }
+  return $win
 }
 #_______________________
 
@@ -56,11 +53,17 @@ proc playtkl::Recording {win ev args} {
     if {$key eq $dd(endkey)} {
       end
     } else {
-      if {$ev eq {KeyRelease} && $dd(prevev) ne {KeyPress} && $key in {Tab Return}} {
-        set t %t=[expr {[Data %t $args]-1}]
-        lappend dd(fcont) KeyPress\ $win\ $args\ $t
+      set t [Data %t $args]
+      if {[string is integer -strict $t] && $t>0} {
+        if {$ev eq {KeyRelease} && $dd(prevev) ne {KeyPress} && $key in {Tab Return}} {
+          set t %t=[expr {[Data %t $args]-1}]
+          lappend dd(fcont) KeyPress\ $win\ $args\ $t
+        }
+        lappend dd(fcont) $ev\ $win\ $args
+      } else {
+        inform yes
+        inform "BUG? (time received 0): $ev $win $args"
       }
-      lappend dd(fcont) $ev\ $win\ $args
       set dd(prevev) $ev
     }
   }
@@ -78,7 +81,7 @@ proc playtkl::Playing {} {
     return
   }
   if {$dd(pause)} {
-    after 300 ::playtkl::Playing
+    after 200 ::playtkl::Playing
     return
   }
   set line [lindex $dd(fcont) $dd(idx)]
@@ -87,12 +90,15 @@ proc playtkl::Playing {} {
     return
   }
   lassign $line ev win
+  set win [Mapping $win]
+  if {$dd(timing) eq {YES}} {inform "$dd(idx): $line"} ;# to debug
   set data [lrange $line 2 end]
   # mouse buttons: pressed on one window, released on other not existing yet
   if {![winfo exists $win]} {
     for {set i $dd(idx)} {$i<$llen && $win ne $dd(win)} {incr i} {
       set l1 [lindex $dd(fcont) $i]
       lassign $l1 e1 w1
+      set w1 [Mapping $w1]
       if {$e1 in {ButtonPress ButtonRelease} && [winfo exists $w1]} {
         set dd(fcont) [lreplace $dd(fcont) $i $i]
         set t [Data %t $dd(data)]
@@ -151,6 +157,27 @@ proc playtkl::PausePlaying {pausekey key} {
 
 # ________________________ Record _________________________ #
 
+proc playtkl::inform {msg} {
+  # Puts out a message and the current time.
+  #   msg - the message or yes/no to switch the puts on/off
+
+  variable dd
+  if {[string is boolean $msg]} {
+    set dd(timing) $msg
+  } elseif {$dd(timing)} {
+    if {[string length $msg]<11} {
+      bell
+      set msg [string range "          $msg" end-10 end]
+    }
+    set msg "playtkl: $msg: [clock format [clock seconds] -format %T]"
+    puts $msg
+  } else {
+    set msg {}
+  }
+  return $msg
+}
+#_______________________
+
 proc playtkl::record {fname {endkey ""}} {
   # Starts the recording.
   #   fname - name of file to store the recording
@@ -159,7 +186,7 @@ proc playtkl::record {fname {endkey ""}} {
   variable fields
   variable dd
   set dd(isrec) yes
-  if {$dd(endkey) eq {}} {
+  if {![info exists dd(msgbeg)]} {
     foreach {o w} $fields {append opts " {%$w=$w}"}
     foreach ev {KeyPress KeyRelease ButtonPress ButtonRelease Motion} {
       bind all <$ev> "+ ::playtkl::Recording %W $ev $opts"
@@ -172,7 +199,7 @@ proc playtkl::record {fname {endkey ""}} {
   set dd(msgbeg) [inform Recording]
 }
 
-# ________________________ Play-back _________________________ #
+# ________________________ Playback _________________________ #
 
 proc playtkl::play {fname {pausekey ""}} {
   # Starts the playback.
@@ -184,24 +211,31 @@ proc playtkl::play {fname {pausekey ""}} {
     bind all <KeyPress> [list + ::playtkl::PausePlaying $pausekey %K]
     set dd(pausekey) $pausekey
   }
-  replay $fname no
+  replay $fname {} {} no
 }
 #_______________________
 
-proc playtkl::replay {{fname ""} {ismacro yes}} {
+proc playtkl::replay {{fname ""} {cbreplay ""} {mappings {}} {ismacro yes}} {
   # Replays a read/written recording, fastly at replaying a macro.
   #   fname - name of file to store the recording
-  #   ismacro - yes for fast replaying a macro
+  #   cbreplay - callback after replaying (e.g with "text edit separator")
+  #   mappings - mappings of some widgets' pathes to currently used ones
+  #   ismacro - yes for fast replaying a macro (used by playtkl)
 
   variable dd
-  set dd(idx) -1
-  set dd(isrec) no
-  set dd(pause) no
   if {$fname ne {}} {
     set ch [open $fname]
     set dd(fcont) [split [string trim [read $ch]] \n]
     close $ch
   }
+  set line [lindex $dd(fcont) 0]
+  lassign $line dd(prevev) dd(win)
+  set dd(data) [lrange $line 2 end]
+  set dd(idx) -1
+  set dd(isrec) no
+  set dd(pause) no
+  set dd(cbreplay) $cbreplay
+  set dd(mappings) $mappings
   if {$ismacro} {
     set fcont [list]
     set time 0
@@ -214,8 +248,8 @@ proc playtkl::replay {{fname ""} {ismacro yes}} {
     }
     set dd(fcont) $fcont
   }
-  Playing
   inform Playing
+  Playing
 }
 
 # ________________________ Game over _________________________ #
@@ -227,18 +261,24 @@ proc playtkl::end {} {
   set msgend [inform End]
   if {$dd(isrec)} {
     set dd(fcont) [lsort -index 2 -dictionary $dd(fcont)] ;# sort by time
-    set dd(fcont) [linsert $dd(fcont) 0 "# $dd(msgbeg)" "# $msgend" #]
+    if {$msgend ne {}} {
+      set dd(fcont) [linsert $dd(fcont) 0 "# $dd(msgbeg)" "# $msgend" #]
+    }
     set ch [open $dd(fname) w]
     foreach line $dd(fcont) {puts $ch $line}
     close $ch
   }
+  if {[info exists dd(cbreplay)] && $dd(cbreplay) ne {}} {
+    {*}$dd(cbreplay)
+  }
+  unset -nocomplain dd(cbreplay)
   set dd(isrec) 0
   set dd(endkey) -
 }
 #_______________________
 
 proc playtkl::isend {} {
-  # Checks if no recording/playing is performed.
+  # Checks if no recording is performed.
 
   variable dd
   return [expr {$dd(endkey) in {- ""}}]

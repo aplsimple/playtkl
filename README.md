@@ -7,7 +7,7 @@ The *playtkl* is Tcl/Tk package that is used:
   * to record a macro containing mouse / keyboard actions
   * to play a macro
 
-So, there are two working modes of *playtkl*: recording and playing. At recording, mouse / keyboard actions occured in a Tk application are saved to a file. At playing, the saved actions are read from the file and played back as if the actions were performed by a human.
+So, there are two working modes of *playtkl*: recording and playing. At recording, mouse / keyboard actions in a Tk application are saved to a file. At playing, the saved actions are read from the file and played back as if the actions were performed by a human.
 
 The *playtkl* is used only with Tk applications. Other GUI Tcl libraries aren't supported.
 
@@ -85,7 +85,7 @@ The example shows a use of *playtkl* in a working mode of Tk application, when t
 
 # Records
 
-The file of records can contain emply lines and comments like this:
+The file of records can contain empty lines and comments like this:
 
     #
     # It's a playtkl test for apave package.
@@ -142,7 +142,7 @@ To replay a macro, *playtkl::replay* is used. A recorded file's name can be pass
 
 # Issues
 
-The initial state of a tested Tk application should be absolutely the same at recording and at playing a testing scenario. If the application uses configuration files, these files should be supplied to it in the same state at recording and at playing. It refers mostly to a geometry of Tk application as a whole and to its internal widgets which depend on a ttk theme. But an application's behavior can interfere with the playing too. Probably, OS environments should be identical, e.g. the less the loaded programs the better (esp. notifiers & shedulers).
+The initial state of a tested Tk application should be absolutely the same at recording and at playing a testing scenario. If the application uses configuration files, these files should be supplied to it in the same state at recording and at playing. It refers mostly to a geometry of Tk application as a whole and to its internal widgets which depend on a ttk theme. But an application's behavior can interfere with the playing too. Probably, OS environments should be identical, e.g. the less the loaded programs the better (esp. notifiers & schedulers).
 
 The following two facts should be counted (i.e. appropriate uses should be avoided):
 
