@@ -1,6 +1,6 @@
 # What's that
 
-The *playtkl* is Tcl/Tk package that is used:
+It is Tcl/Tk package:
 
   * to make a testing scenario for a Tk application
   * to run a testing scenario for a Tk application
@@ -109,7 +109,7 @@ At need, any lines can be commented out, e.g. last ones that close the applicati
 
 # Macros
 
-The usage of *playtkl* to record / play macros is nearly the same as above described.
+The recording and playing macros is a side effect of the *playtkl*'s main usage. However small, this effect is rather effective sometimes.
 
 The recording and playing macros are performed inside and for a Tcl/Tk application, so that no need for "if 0 ..." to disable *playtkl*.
 
@@ -138,7 +138,7 @@ For example:
     ...
     playtkl::replay
 
-To replay a macro, *playtkl::replay* is used. A recorded file's name can be passed to *playtkl::replay*. When *playtkl::replay* has no arguments, it doesn't read a file of records, it just replays what was read and played before.
+To replay a macro, *playtkl::replay* is used. A recorded file's name can be passed to *playtkl::replay*. When *playtkl::replay* has no arguments, it doesn't read a file of records, it just replays what was read and played before. Other facilities of `playtkl::replay` can be seen in [Reference](https://aplsimple.github.io/en/tcl/playtkl/playtkl.html), e.g. using a callback for "text edit separator" to undo / redo at one blow.
 
 # Issues
 
