@@ -83,6 +83,8 @@ In the above example, F12 is passed as 2nd (omittable) argument to *playtkl::pla
 
 The example shows a use of *playtkl* in a working mode of Tk application, when the *playtkl* stuff is disabled with "if 0 ..." command (or with commenting out).
 
+The *playtkl::record* has a *mouse* argument to regard / disregard the mouse actions (moving, clicking) at recording a macro.
+
 # Records
 
 The file of records can contain empty lines and comments like this:
@@ -173,3 +175,4 @@ All in all, *playtkl* allows testing the main functions of Tk apps and enhancing
   * [Source #1](https://chiselapp.com/user/aplsimple/repository/playtkl/download)
   * [Source #2](https://github.com/aplsimple/playtkl)
   * [Demo of recording & playing](https://github.com/aplsimple/playtkl/releases/tag/demo-playtkl-1.0)
+  * [Using in alited](https://aplsimple.github.io/en/tcl/alited/index.html#macros)
