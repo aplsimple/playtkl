@@ -163,8 +163,6 @@ The following two facts should be counted (i.e. appropriate uses should be avoid
 
    * *playtkl* doesn't catch events related to window managers like clicking a window's title buttons
 
-With moveable widgets like scrollbars, scales, rulers etc., there may be problems when the widgets are moved too fast at recording - then, at playing them, the mouse pointer can lag a bit, so that the replayed picture would be distorted. Though a bit annoying, this artifact isn't critical in most cases.
-
 However, if played okay once, a recorded scenario would be played okay in all future runs as well. It isn't hard to reach.
 
 All in all, *playtkl* allows testing the main functions of Tk apps and enhancing their facilities with macros.
