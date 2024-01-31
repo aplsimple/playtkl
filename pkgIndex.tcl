@@ -179,7 +179,7 @@ All in all, *playtkl* allows testing the main functions of Tk apps and enhancing
   * [Reference](https://aplsimple.github.io/en/tcl/playtkl/playtkl.html)
   * [Source #1](https://chiselapp.com/user/aplsimple/repository/playtkl/download)
   * [Source #2](https://github.com/aplsimple/playtkl)
-  * [Demo of recording & playing](https://github.com/aplsimple/playtkl/releases/tag/demo-playtkl-1.0)
+  * [Demo of recording & playing](https://github.com/aplsimple/playtkl/releases/tag/demo-playtkl-1.3)
   * [Using in alited](https://aplsimple.github.io/en/tcl/alited/index.html#macros)
   }
 }
